@@ -48,4 +48,14 @@ public class AllController {
             return new ResponseEntity<>(0, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/sql-error/")
+    public ResponseEntity<Integer> sqlError() {
+        try {
+            return new ResponseEntity<>(allService.sqlError(), HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(0, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

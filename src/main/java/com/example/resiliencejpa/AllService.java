@@ -26,4 +26,8 @@ public class AllService {
     public int sleep(int delay) {
         return userRepository.sleep(delay);
     }
+
+    public int sqlError() {
+        return userRepository.sqlError();
+    }
 }

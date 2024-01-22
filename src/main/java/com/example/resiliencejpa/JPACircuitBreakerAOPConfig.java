@@ -10,6 +10,8 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Component;
 
+import java.net.ConnectException;
+
 @Aspect
 @Component
 @EnableAspectJAutoProxy
@@ -41,18 +43,23 @@ public class JPACircuitBreakerAOPConfig {
   public void crudRepositoryAnnotationPointCut() {}
 
   @Around("crudRepositoryAnnotationPointCut() || jpaRepositoryInterfacePointCut() || repositoryAnnotationPointCut()")
-  public Object repositoryAround(ProceedingJoinPoint pjp) {
+  public Object repositoryAround(ProceedingJoinPoint pjp) throws Throwable {
     if (log.isTraceEnabled()) {
       log.trace("JPA Circuit Breaker for - {}, method - {}", pjp.getSignature().getDeclaringType().getName(), pjp.getSignature().getName());
     }
 
-    return CircuitBreaker.decorateSupplier(circuitBreaker, () -> {
+    return CircuitBreaker.decorateCheckedSupplier(circuitBreaker, () -> {
       try {
         return pjp.proceed();
       } catch (Throwable e) {
-        log.error("JPA Circuit Breaker for - %s, method - %S - throw an Exception".formatted(pjp.getSignature().getDeclaringType().getName(), pjp.getSignature().getName()), e);
-        //FIXME
-        throw new RuntimeException(e);
+        log.debug("JPA Circuit Breaker for - %s, method - %S - throw an Exception".formatted(pjp.getSignature().getDeclaringType().getName(), pjp.getSignature().getName()), e);
+        // Filter only Database connection issues
+        if (e.getCause() instanceof ConnectException) {
+          log.error("Database Access issue detected, a " + DatabaseAccessException.class.getSimpleName() + " will be thrown", e);
+          throw new DatabaseAccessException(e.getCause());
+        } else {
+          throw e;
+        }
       }
     }).get();
   }

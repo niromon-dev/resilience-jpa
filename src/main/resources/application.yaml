@@ -17,7 +17,7 @@ spring:
             jakarta:
                 persistence:
                     query:
-                        timeout: 15000
+                        timeout: 5000
     hibernate:
         ddl-auto: true
     show-sql: true
@@ -44,11 +44,13 @@ resilience4j:
 #                sliding-window-type: TIME_BASED
                 failure-rate-threshold: 50
                 wait-duration-in-open-state: 30s
-                minimum-number-of-calls: 1000
+                minimum-number-of-calls: 1
                 automatic-transition-from-open-to-half-open-enabled: true
                 permitted-number-of-calls-in-half-open-state: 3
+                recordExceptions:
+                    - com.example.resiliencejpa.DatabaseAccessException
 
 
 logging.level.com.zaxxer.hikari.HikariConfig: DEBUG
-logging.level.com.zaxxer.hikari: TRACE
+logging.level.com.zaxxer.hikari: INFO
 logging.level.com.example.resiliencejpa: TRACE

@@ -13,4 +13,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
             value = "WITH sleep AS (select pg_sleep(:delay)) select 1 from sleep")
     int sleep(@Param("delay") int delay);
 
+    @Query(
+            nativeQuery = true,
+            value = "select error from error")
+    int sqlError();
+
 }
