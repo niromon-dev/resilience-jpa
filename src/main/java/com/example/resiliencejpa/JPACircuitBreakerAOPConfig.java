@@ -7,6 +7,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.hibernate.exception.JDBCConnectionException;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Component;
 
@@ -54,9 +55,9 @@ public class JPACircuitBreakerAOPConfig {
       } catch (Throwable e) {
         log.debug("JPA Circuit Breaker for - %s, method - %S - throw an Exception".formatted(pjp.getSignature().getDeclaringType().getName(), pjp.getSignature().getName()), e);
         // Filter only Database connection issues
-        if (e.getCause() instanceof ConnectException) {
+        if (e.getCause() instanceof ConnectException || e.getCause() instanceof JDBCConnectionException) {
           log.error("Database Access issue detected, a " + DatabaseAccessException.class.getSimpleName() + " will be thrown", e);
-          throw new DatabaseAccessException(e.getCause());
+          throw new DatabaseAccessException(e);
         } else {
           throw e;
         }
