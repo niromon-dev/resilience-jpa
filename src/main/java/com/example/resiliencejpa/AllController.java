@@ -27,8 +27,8 @@ public class AllController {
                 return new ResponseEntity<>(allService.all(), HttpStatus.OK);
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
-            return new ResponseEntity<>(List.of(), HttpStatus.INTERNAL_SERVER_ERROR);
+            log.error(e.getClass().getSimpleName() + "-" + e.getMessage());
+            throw e;
         }
     }
 
